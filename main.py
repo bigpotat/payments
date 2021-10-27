@@ -261,45 +261,62 @@ def purchase():
     if request.method == "POST":
         monthlyInvestment = float(request.form["monthlyInvestment"])
         riskAppetite = request.form["riskAppetite"]
-        stockMap = {"low": ["^GSPC", "^HSI", "T", "VOD", "AA", "IBM"],
-                    "medium": ["AAP", "FB", "PSEI.PS", "AAPL", "^DJI", "^N225", "MSFT", "GOOG"],
-                    "high": ["YAHOY", "HRB", "A", "^STI", "AMZN", "NFLX", "^FTSE", "TSLA", "UBER"]}
+        stockMap = {"low": ["^GSPC", "T", "VOD", "AA", "IBM"],
+                    "medium": ["AAP", "FB", "^DJI", "MSFT", "GOOG"],
+                    "high": ["YAHOY", "HRB", "A", "AMZN", "NFLX", "TSLA"]}
         stockList = stockMap[riskAppetite]
-        allocation, used = stockAlloc(stockList, monthlyInvestment)
+        allocation, used = stockAlloc(riskAppetite, monthlyInvestment)
         session['stocks'] = allocation
-        newBalance = float(getBalance(
-            session['user_id'], session['pin'], session['account'])) - float(used)
+        newBalance = float(getBalance(session['user_id'], session['pin'], session['account'])) - float(used)
         return render_template('purchase.html', allocation=allocation, used=used, newBalance=newBalance)
-    all_stocks_purchased = []
     for stock in session['stocks']:
-        stock_purchased = stockOrder('buy', session['user_id'], session['pin'],
-                                     session['account'], stock[0], stock[1])
-        if stock_purchased:
-            all_stocks_purchased.append(stock_purchased)
-    if all_stocks_purchased:
-        serviceName = 'getCustomerDetails'
-        headerObj = {
-            'Header': {
-                'serviceName': serviceName,
-                'userID': session['user_id'],
-                'PIN': session['pin'],
-                'OTP': '999999'
-            }
-        }
-        final_url = "{0}?Header={1}".format(
-            "http://tbankonline.com/SMUtBank_API/Gateway", json.dumps(headerObj))
-        response = requests.post(final_url)
-        serviceRespHeader = response.json(
-        )['Content']['ServiceResponse']['ServiceRespHeader']
-        errorCode = serviceRespHeader['GlobalErrorID']
-        if errorCode == '010000':
-            CDMCustomer = response.json(
-            )['Content']['ServiceResponse']['CDMCustomer']
-            phonenumber = CDMCustomer['cellphone']['phoneNumber']
-        message = "You have just purchased stocks on tbank. Stock purchase order ID: " + \
-            str(stock_purchased)
-        sendSMS(session['user_id'], session['pin'], phonenumber, message)
+        stockOrder('buy', session['user_id'], session['pin'],
+                                    session['account'], stock[0], stock[1])
     return redirect('home')
+
+# def purchase_OLD():
+#     if request.method == "POST":
+#         monthlyInvestment = float(request.form["monthlyInvestment"])
+#         riskAppetite = request.form["riskAppetite"]
+#         stockMap = {"low": ["^GSPC", "T", "VOD", "AA", "IBM"],
+#                     "medium": ["AAP", "FB", "^DJI", "MSFT", "GOOG"],
+#                     "high": ["YAHOY", "HRB", "A", "AMZN", "NFLX", "TSLA"]}
+#         stockList = stockMap[riskAppetite]
+#         allocation, used = stockAlloc(stockList, monthlyInvestment)
+#         session['stocks'] = allocation
+#         newBalance = float(getBalance(
+#             session['user_id'], session['pin'], session['account'])) - float(used)
+#         return render_template('purchase.html', allocation=allocation, used=used, newBalance=newBalance)
+#     all_stocks_purchased = []
+#     for stock in session['stocks']:
+#         stock_purchased = stockOrder('buy', session['user_id'], session['pin'],
+#                                      session['account'], stock[0], stock[1])
+#         if stock_purchased:
+#             all_stocks_purchased.append(stock_purchased)
+#     if all_stocks_purchased:
+#         serviceName = 'getCustomerDetails'
+#         headerObj = {
+#             'Header': {
+#                 'serviceName': serviceName,
+#                 'userID': session['user_id'],
+#                 'PIN': session['pin'],
+#                 'OTP': '999999'
+#             }
+#         }
+#         final_url = "{0}?Header={1}".format(
+#             "http://tbankonline.com/SMUtBank_API/Gateway", json.dumps(headerObj))
+#         response = requests.post(final_url)
+#         serviceRespHeader = response.json(
+#         )['Content']['ServiceResponse']['ServiceRespHeader']
+#         errorCode = serviceRespHeader['GlobalErrorID']
+#         if errorCode == '010000':
+#             CDMCustomer = response.json(
+#             )['Content']['ServiceResponse']['CDMCustomer']
+#             phonenumber = CDMCustomer['cellphone']['phoneNumber']
+#         message = "You have just purchased stocks on tbank. Stock purchase order ID: " + \
+#             str(stock_purchased)
+#         sendSMS(session['user_id'], session['pin'], phonenumber, message)
+#     return redirect('home')
 
 
 @app.route('/')

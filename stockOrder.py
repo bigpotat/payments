@@ -39,4 +39,4 @@ def stockOrder(buyOrSell, user_id, pin, account, symbol, quantity):
         return marketOrder['orderID']
 
 # NOTE debug
-# print(stockOrder("buy", "01332738", "877324", "0000007114", "TSLA", "1"))
+# print(stockOrder("buy", "01332738", "877324", "0000007114", "A", "1"))
