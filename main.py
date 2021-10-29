@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask import Flask, request, render_template, flash, redirect, url_for, session
+from flask import Flask, request, render_template, flash, redirect, url_for, session, Response
 from flask_cors import CORS
 import uuid
 import datetime
@@ -337,6 +337,74 @@ def sell():
             msg = "Unable to sell"
     return render_template('sell.html', msg=msg, allocation=session['stocks'])
 
+@app.route('/pay', methods=["POST", "GET"])
+def pay():
+    if request.method == "POST":
+        amount = request.form['amount']
+        print(session['account'])
+        # trim session account to last 4 digits
+        # session['account'] = session['account'][-4:]
+        print(session['account'])
+        if (creditTransfer(session['account'],'', amount, session['user_id'], session['pin'])):
+            return "paid successfully"
+        else:
+            # return unable to pay
+            return "unable to pay" 
+    if request.method == "GET":
+        return render_template('pay.html')
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('user_id', None)
+    session.pop('pin', None)
+    session.pop('account', None)
+    session.pop('stocks', None)
+    return redirect('home')
+
+def creditTransfer(accountFrom, accountTo, transactionAmount, userID, PIN):
+    #Header
+    serviceName = 'creditTransfer'
+    userID = userID
+    PIN = PIN
+    OTP = '999999'
+    #Content
+    accountFrom = accountFrom
+    accountTo = '6653'
+    transactionAmount = transactionAmount
+    transactionReferenceNumber = '12332'
+    narrative = '2'
+    headerObj = {
+                        'Header': {
+                        'serviceName': serviceName,
+                        'userID':userID,
+                        'PIN': PIN,
+                        'OTP': OTP
+                        }
+                        }
+    contentObj = {
+                        'Content': {
+                        'accountFrom': accountFrom,
+                        'accountTo': accountTo,
+                        'transactionAmount': transactionAmount,
+                        'transactionReferenceNumber': transactionReferenceNumber,
+                        'narrative': narrative
+                        }
+                        }
+    final_url="{0}?Header={1}&Content={2}".format("http://tbankonline.com/SMUtBank_API/Gateway",json.dumps(headerObj),json.dumps(contentObj))
+    response = requests.post(final_url)
+    serviceRespHeader = response.json()['Content']['ServiceResponse']['ServiceRespHeader']
+    errorCode = serviceRespHeader['GlobalErrorID']
+
+    if errorCode == '010000':
+        ServerResponse = response.json()['Content']['ServiceResponse']
+        print("Balance After Transferring ${:.2f} ".format(float(ServerResponse['BalanceAfter']['_content_'])))
+        print("Transaction ID: ", ServerResponse['TransactionID']['_content_'])
+        print("Balance Before Transferring ${:.2f}".format(float(ServerResponse['BalanceBefore']['_content_'])))
+    elif errorCode == '010041':
+        print("OTP has expired.\nYou will receiving a SMS")  
+    else:
+        print(serviceRespHeader['ErrorText'])
+    return True
 
 if __name__ == "__main__":
     app.run(port=8000, debug=True)
