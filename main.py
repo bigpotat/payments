@@ -258,6 +258,7 @@ def home():
 
 @app.route('/purchase', methods=["GET", "POST"])
 def purchase():
+    
     if request.method == "POST":
         monthlyInvestment = float(request.form["monthlyInvestment"])
         riskAppetite = request.form["riskAppetite"]
@@ -266,9 +267,13 @@ def purchase():
                     "high": ["YAHOY", "HRB", "A", "AMZN", "NFLX", "TSLA"]}
         stockList = stockMap[riskAppetite]
         allocation, used = stockAlloc(riskAppetite, monthlyInvestment)
+        
         session['stocks'] = allocation
+        session['used'] = used
         newBalance = float(getBalance(session['user_id'], session['pin'], session['account'])) - float(used)
         return render_template('purchase.html', allocation=allocation, used=used, newBalance=newBalance)
+    creditTransfer(session['account'], '6696', float(session['used']), session['user_id'], session['pin'])
+    
     for stock in session['stocks']:
         stockOrder('buy', session['user_id'], session['pin'],
                                     session['account'], stock[0], stock[1])
@@ -369,7 +374,7 @@ def creditTransfer(accountFrom, accountTo, transactionAmount, userID, PIN):
     OTP = '999999'
     #Content
     accountFrom = accountFrom
-    accountTo = '6653'
+    accountTo = '6696'
     transactionAmount = transactionAmount
     transactionReferenceNumber = '12332'
     narrative = '2'
