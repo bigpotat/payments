@@ -69,12 +69,21 @@
     </style>
 </head>
 <body>
+    {% if session.paymentMsg %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>{{ session.paymentMsg }}</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
     <!-- Welcome message -->
     <div class="jumbotron text-center animate__animated animate__fadeIn">
         <img src="{{ url_for('static',filename='invest.png') }}" class="img-fluid icon pb-3" alt="">
 
         <h1 class="display-4 kiona">Invest</h2>
         <p class="lead">Welcome back, {{ username }}</p>
+        <p class="lead">Your balance is <strong>{{ session.accountBalance }}</strong></p>
     </div>
 
     <!-- Summary of stocks -->

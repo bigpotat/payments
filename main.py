@@ -271,9 +271,11 @@ def purchase():
         session['stocks'] = allocation
         session['used'] = used
         newBalance = float(getBalance(session['user_id'], session['pin'], session['account'])) - float(used)
+        session['accountBalance'] = newBalance
         return render_template('purchase.html', allocation=allocation, used=used, newBalance=newBalance)
-    creditTransfer(session['account'], '6696', float(session['used']), session['user_id'], session['pin'])
-    
+    result = creditTransfer(session['account'], '6696', float(session['used']), session['user_id'], session['pin'])
+    if result == True:
+        session['paymentMsg'] = "You've successfully paid " + session['used'] + " to our company"
     for stock in session['stocks']:
         stockOrder('buy', session['user_id'], session['pin'],
                                     session['account'], stock[0], stock[1])
