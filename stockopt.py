@@ -124,7 +124,7 @@ def stockAlloc_setup(infile, outfile):
     print(cleaned_weights)
     ef.portfolio_performance(verbose=True)
 
-def stockAlloc(risk="medium", total=100000):
+def stockAlloc(risk="medium", total=1000):
     risk = risk.strip()
     stockdata = "stockdata_" + risk + ".csv"
     df = pd.read_csv(stockdata, parse_dates=True, index_col="date")
