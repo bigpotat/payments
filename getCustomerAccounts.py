@@ -28,7 +28,7 @@ def getCustomerAccounts(user_id, pin):
             if recordCount > 1:
                 for i in range(0, recordCount, 1):
                     account = acc_list[i]
-                    return account['accountID']
+                    return (account['accountID'], account['balance'])
             elif recordCount == 0:
                 return acc_list['accountID']
     return False

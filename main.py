@@ -55,7 +55,7 @@ def signup(msg=None):
         session['name'] = request.form['name']
         user_id = request.form['userID']
         pin = request.form['PIN']
-        account = getCustomerAccounts(user_id, pin)
+        account = getCustomerAccounts(user_id, pin)[0]
         if account:
             session['user_id'] = user_id
             session['pin'] = pin
@@ -77,9 +77,14 @@ def landing():
     return render_template('landing.html', balance=balance)
 
 
-@app.route('/settings')
+@app.route('/settings', methods=["GET", "POST"])
 def settings():
-    return render_template('settings.html')
+    if request.method == "POST":
+        session['newMonthlyInvestment'] = request.form['monthly_investment']
+        session['newMonthlyInvestmentMsg'] = "You have changed your monthly investment to $" + session['newMonthlyInvestment']
+        return redirect('/home')
+    if request.method == "GET":
+        return render_template('settings.html')
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -89,8 +94,10 @@ def home():
 
     if request.method == 'POST':
         symbol = request.form['symbol']
+        session['accountBalance'] = getBalance(session['user_id'], session['pin'], session['account'])
     else:
         symbol = 'AAPL'
+        session['accountBalance'] = getBalance(session['user_id'], session['pin'], session['account'])
 
     serviceName = 'getCustomerStocks'
     userID = session['user_id']
@@ -271,12 +278,13 @@ def purchase():
         session['stocks'] = allocation
         session['used'] = used
         newBalance = float(getBalance(session['user_id'], session['pin'], session['account'])) - float(used)
-        session['accountBalance'] = round(newBalance,2)
+        # session['accountBalance'] = round(newBalance,2)
         return render_template('purchase.html', allocation=allocation, used=used, newBalance=newBalance)
     result = creditTransfer(session['account'], '6696', float(session['used']), session['user_id'], session['pin'])
     creditTransfer('7083', '6653', float(session['used']), 'A123456', '211285')
+    
     if result == True:
-        session['paymentMsg'] = "You've successfully paid " + session['used'] + " to tInvest"
+        session['paymentMsg'] = "You have successfully paid $" + session['used'] + " to tInvest"
         sendSMS(session['user_id'], session['pin'], '87534035', session['paymentMsg'])
     for stock in session['stocks']:
         stockOrder('buy', session['user_id'], session['pin'],

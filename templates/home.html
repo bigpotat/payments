@@ -77,6 +77,14 @@
         </button>
     </div>
     {% endif %}
+    {% if session.newMonthlyInvestmentMsg %}
+    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+        <strong>{{ session.newMonthlyInvestmentMsg }}</strong>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
     <!-- Welcome message -->
     <div class="jumbotron text-center animate__animated animate__fadeIn">
         <img src="{{ url_for('static',filename='invest.png') }}" class="img-fluid icon pb-3" alt="">

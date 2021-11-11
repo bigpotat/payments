@@ -51,17 +51,16 @@
         <!-- Portfolio settings -->
         <h1 class="kiona">Portfolio Settings</h1>
         <p class="klik">Your monthly investment amount is: {{ monthly_investment }}</p>
-        <p class="klik">Please input your new monthly investment amount:</p>
-        <input
-          name="monthly_investment"
-          type="text"
-          class="form-control my-4 text-center klik"
-          placeholder="Monthly Investment Amount"
-        />
-        <!-- Submit -->
-        <div class="d-flex justify-content-center kiona">
-            <button type="submit" class="btn btn-dark hvr-grow"><h4><a href="/home" style="color: white">Submit</a></h4></button>
-        </div>
+
+        <form method="POST" action="">
+            <div class="form-group">
+              <label for="newMonthlyAmount">Please input your new monthly investment amount:</label>
+              <input type="text" name="monthly_investment" class="form-control text-center klik" id="newMonthlyAmount" placeholder="Monthly Investment Amount">
+            </div>
+            <button type="submit" class="btn btn-dark hvr-grow kiona"><h4>Submit</h4></button>
+          </form>
+        
+        
         <!-- Risk settings? -->
     </div>
 
